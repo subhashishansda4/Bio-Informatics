@@ -16,6 +16,9 @@ linear regression model for predicting molecular solubility
 #---------------------------------------------------------------------------------------------------------
 # importing libraries
 import pandas as pd
+import numpy as np
+from rdkit import Chem
+from rdkit.Chem import Descriptors, Lipinski
 # CHEMBL database
 from chembl_webresource_client.new_client import new_client
 
@@ -58,7 +61,7 @@ selection = ['molecule_chembl_id', 'canonical_smiles', 'standard_value']
 df_filter = df[selection]
 # merging dataframes
 dfs = [df_filter, pd.Series(bioactivity_class)]
-pd.concat(dfs, axis=1)
+df_bioclass = pd.concat(dfs, axis=1)
 
 # dataframe to csv
 df_filter.to_csv('bioactivity_preprocessed_data.csv', index = False)
@@ -67,3 +70,41 @@ df_filter.to_csv('bioactivity_preprocessed_data.csv', index = False)
 
 # EDA
 #---------------------------------------------------------------------------------------------------------
+# source - https://codeocean.com/explore/capsules?query=tag:data-curation
+df = pd.read_csv('bioactivity_preprocessed_data.csv')
+
+# calculating lipinski descriptors
+def lipinski(smiles, verbose = False):
+    moldata = []
+    for elem in smiles:
+        mol = Chem.MolFromSmiles(elem)
+        moldata.append(mol)
+        
+    baseData = np.arange(1,1)
+    i=0
+    for mol in moldata:
+        desc_MolWt = Descriptors.MolWt(mol)
+        desc_MolLogP = Descriptors.MolLogP(mol)
+        desc_NumHDonors = Lipinski.NumHDonors(mol)
+        desc_NumHAcceptors = Lipinski.NumHAcceptors(mol)
+        
+        row = np.array([desc_MolWt,
+                        desc_MolLogP,
+                        desc_NumHDonors,
+                        desc_NumHAcceptors
+                    ])
+        
+        if(i==0):
+            baseData = row
+        else:
+            baseData = np.vstack([baseData, row])
+        i=i+1
+    
+    columnNames = ['MW', 'LogP', 'NumHDonors', 'NumHAcceptors']
+    descriptors = pd.DataFrame(data=baseData, columns=columnNames)
+    
+    return descriptors
+
+# dataframe
+df_lipinski = lipinski(df.canonical_smiles)
+df_combined = pd.concat([df_bioclass, df_lipinski], axis=1)
