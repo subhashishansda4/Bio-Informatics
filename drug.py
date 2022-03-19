@@ -55,16 +55,36 @@ for i in df.standard_value:
         bioactivity_class.append('active')
     else:
         bioactivity_class.append('intermediate')
+
+# iterating through molecule_chembl_id
+mol_cid = []
+for i in df.molecule_chembl_id:
+    mol_cid.append(i)
+    
+# iterating through canonical_smiles
+canonical_smiles = []
+for i in df.canonical_smiles:
+    canonical_smiles.append(i)
+    
+# iterating through standard_value
+standard_value = []
+for i in df.standard_value:
+    standard_value.append(i)
+
+# combining the 4 lists into a dataframe
+data_tuples = list(zip(mol_cid, canonical_smiles, bioactivity_class, standard_value))
+df_bioclass = pd.DataFrame(data_tuples, columns=['molecule_chembl_id', 'canonical_smiles', 'bioactivity_class', 'standard_value'])
         
-# selecting different parameters to iterate through and make them unique
-selection = ['molecule_chembl_id', 'canonical_smiles', 'standard_value']
-df_filter = df[selection]
-# merging dataframes
-dfs = [df_filter, pd.Series(bioactivity_class)]
-df_bioclass = pd.concat(dfs, axis=1)
+# =============================================================================
+# # selecting different parameters to iterate through and make them unique
+# selection = ['molecule_chembl_id', 'canonical_smiles', 'standard_value']
+# df_filter = df[selection]
+# # merging dataframes
+# df_bioclass = pd.concat([df_filter, pd.Series(bioactivity_class)], axis=1)
+# =============================================================================
 
 # dataframe to csv
-df_filter.to_csv('bioactivity_preprocessed_data.csv', index = False)
+df_bioclass.to_csv('bioactivity_preprocessed_data.csv', index = False)
 #---------------------------------------------------------------------------------------------------------
 
 
@@ -107,4 +127,58 @@ def lipinski(smiles, verbose = False):
 
 # dataframe
 df_lipinski = lipinski(df.canonical_smiles)
-df_combined = pd.concat([df_bioclass, df_lipinski], axis=1)
+df_lipinski = pd.concat([df_bioclass, df_lipinski], axis=1)
+
+# dataframe to csv
+df_lipinski.to_csv('lipinski_descriptors.csv', index=False)
+
+# NOTE
+# values greater than 100,000,000 will be fixed at that value
+# otherwise the negative logarithmic value will become negative
+df_lipinski.standard_value.describe()
+-np.log10((10**-9)*100000000)
+-np.log10((10**-9)*10000000000)
+
+print(df_lipinski.dtypes)
+df_lipinski['standard_value'] = df_lipinski['standard_value'].astype(float)
+print(df_lipinski.dtypes)
+
+# capping the standard_value
+def norm_value(input):
+    norm = []
+    
+    for i in input['standard_value']:
+        if i > 100000000:
+            i = 100000000
+        norm.append(i)
+    
+    input['standard_value_norm'] = norm
+    #x = input.drop('standard_value', 1)
+    x = input
+    
+    return x
+
+
+# converting IC50 to pIC50
+# source - https://github.com/chaninlab/estrogen-receptor-alpha-qsar/blob/master/02_ER_alpha_RO5.ipynb
+def pIC50(input):
+    pIC50 = []
+    
+    for i in input['standard_value_norm']:
+        molar = float(i)*(10**-9)  # converts nM to M
+        pIC50.append(-np.log10(molar))
+        
+    input['pIC50'] = pIC50
+    x = input.drop('standard_value_norm', 1)
+    
+    return x
+
+# applying normalization of values
+df_final = norm_value(df_lipinski)
+# applying conversion of IC50 to pIC50
+df_final = pIC50(df_final)
+# removing 'intermediate' bioactivity class
+df_final = df_final[df_final.bioactivity_class != 'intermediate']
+
+# dataframe to csv
+df_final.to_csv('final_data.csv', index=False)
