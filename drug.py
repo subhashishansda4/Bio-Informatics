@@ -17,6 +17,10 @@ linear regression model for predicting molecular solubility
 # importing libraries
 import pandas as pd
 import numpy as np
+import seaborn as sns
+sns.set(style='ticks')
+import matplotlib.pyplot as plt
+# rdkit for lipinski descriptors
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski
 # CHEMBL database
@@ -88,11 +92,9 @@ df_bioclass.to_csv('bioactivity_preprocessed_data.csv', index = False)
 #---------------------------------------------------------------------------------------------------------
 
 
-# EDA
+# DATA CLEANING & PROCESSING
 #---------------------------------------------------------------------------------------------------------
 # source - https://codeocean.com/explore/capsules?query=tag:data-curation
-df = pd.read_csv('bioactivity_preprocessed_data.csv')
-
 # calculating lipinski descriptors
 def lipinski(smiles, verbose = False):
     moldata = []
@@ -139,6 +141,7 @@ df_lipinski.standard_value.describe()
 -np.log10((10**-9)*100000000)
 -np.log10((10**-9)*10000000000)
 
+# changing data type of 'standard_value'
 print(df_lipinski.dtypes)
 df_lipinski['standard_value'] = df_lipinski['standard_value'].astype(float)
 print(df_lipinski.dtypes)
@@ -182,3 +185,145 @@ df_final = df_final[df_final.bioactivity_class != 'intermediate']
 
 # dataframe to csv
 df_final.to_csv('final_data.csv', index=False)
+#---------------------------------------------------------------------------------------------------------
+
+
+# EDA (CHEMICAL SPACE ANALYSIS)
+#---------------------------------------------------------------------------------------------------------
+'''
+Jose Medina Franco (author)
+each chemical compound could be thought of as stars, i.e. active molecules would be compared to as constellations
+he developed an approach termed as "Constellation Plot" whereby one can perform chemical space analysis & create constellation plot where
+
+[active molecule would be correspondingly have larger sizes compared to less active molecule]
+'''
+# frequency plot of bioactivity classes comparing inactive and active molecules
+plt.figure(figsize = (5.5, 5.5))
+sns.countplot(x = 'bioactivity_class', data = df_final, edgecolor = 'black')
+
+plt.xlabel('Bioactivity class', fontsize = 14, fontweight = 'bold')
+plt.ylabel('Frequency', fontsize = 14, fontweight = 'bold')
+
+plt.savefig('plot_bioactivity_class.jpg')
+
+# scatter plot of molecular weight(MW) v/s molecular solubility(logP)
+plt.figure(figsize = (5.5, 5.5))
+sns.scatterplot(x = 'MW', y = 'LogP', data = df_final, hue = 'bioactivity_class', size = 'pIC50', edgecolor = 'black', alpha = 0.7)
+
+plt.xlabel('MW', fontsize = 14, fontweight = 'bold')
+plt.ylabel('LogP', fontsize = 14, fontweight = 'bold')
+plt.legend(bbox_to_anchor = (1.05, 1), loc = 2, borderaxespad = 0)
+
+plt.savefig('plot_MW_vs_logP.jpg')
+
+# mann-whitney U test
+# source - https://machinelearningmastery.com/nonparametric-statistical-significance-tests-in-python
+def mannwhitney(descriptor, verbose = False):
+    from numpy.random import seed
+    from scipy.stats import mannwhitneyu
+    
+    # seeding the random number generator
+    seed(1)
+    
+    # actives and inactives
+    selection = [descriptor, 'bioactivity_class']
+    df = df_final[selection]
+    active = df[df.bioactivity_class == 'active']
+    active = active[descriptor]
+    
+    selection = [descriptor, 'bioactivity_class']
+    df = df_final[selection]
+    inactive = df[df.bioactivity_class == 'inactive']
+    inactive = inactive[descriptor]
+    
+    # compare samples
+    stat, p = mannwhitneyu(active, inactive)
+    print('Statistics=%.3f, p=%.3f' % (stat, p))
+    
+    # interpret
+    alpha = 0.05
+    if p > alpha:
+        interpretation = 'Same distribution (fail to reject H0)'
+    else:
+        interpretation = 'Different distribution (reject H0)'
+        
+    results = pd.DataFrame({'Descriptor': descriptor,
+                            'Statistics': stat,
+                            'p': p,
+                            'alpha': alpha,
+                            'Interpretation': interpretation}, index=[0])
+    
+    filename = 'mannwhitneyu_' + descriptor + '.csv'
+    results.to_csv(filename)
+    
+    return results
+
+# box plots for pIC50, MW, LogP, NumHDonors, NumHAcceptors
+# performing mann-whitney analysis for each one of them
+
+# pIC50
+plt.figure(figsize = (5.5, 5.5))
+sns.boxplot(x = 'bioactivity_class', y = 'pIC50', data = df_final)
+plt.xlabel('Bioactivity_class', fontsize = 14, fontweight = 'bold')
+plt.ylabel('pIC50 value', fontsize = 14, fontweight = 'bold')
+plt.savefig('plot_ic50.jpg')
+mannwhitney('pIC50')
+
+# MW
+plt.figure(figsize = (5.5, 5.5))
+sns.boxplot(x = 'bioactivity_class', y = 'MW', data = df_final)
+plt.xlabel('Bioactivity_class', fontsize = 14, fontweight = 'bold')
+plt.ylabel('MW', fontsize = 14, fontweight = 'bold')
+plt.savefig('plot_MW.jpg')
+mannwhitney('MW')
+
+# LogP
+plt.figure(figsize = (5.5, 5.5))
+sns.boxplot(x = 'bioactivity_class', y = 'LogP', data = df_final)
+plt.xlabel('Bioactivity_class', fontsize = 14, fontweight = 'bold')
+plt.ylabel('LogP', fontsize = 14, fontweight = 'bold')
+plt.savefig('plot_LogP.jpg')
+mannwhitney('LogP')
+
+# NumHDonors
+plt.figure(figsize = (5.5, 5.5))
+sns.boxplot(x = 'bioactivity_class', y = 'NumHDonors', data = df_final)
+plt.xlabel('Bioactivity_class', fontsize = 14, fontweight = 'bold')
+plt.ylabel('NumHDonors', fontsize = 14, fontweight = 'bold')
+plt.savefig('plot_NumHDonors.jpg')
+mannwhitney('NumHDonors')
+
+# NumHAcceptors
+plt.figure(figsize = (5.5, 5.5))
+sns.boxplot(x = 'bioactivity_class', y = 'NumHAcceptors', data = df_final)
+plt.xlabel('Bioactivity_class', fontsize = 14, fontweight = 'bold')
+plt.ylabel('NumHAcceptors', fontsize = 14, fontweight = 'bold')
+plt.savefig('NumHAcceptors.jpg')
+mannwhitney('NumHAcceptors')
+#---------------------------------------------------------------------------------------------------------
+
+
+# DATA PREPARATION
+#---------------------------------------------------------------------------------------------------------
+selection = ['canonical_smiles', 'molecule_chembl_id']
+df_final_selection = df_final[selection]
+df_final_selection.to_csv('molecule.smi', sep='\t', index=False, header=False)
+
+# preparing X and Y matrices
+# X
+df_final_X = pd.read_csv('descriptors_output.csv')
+df_final_X = df_final_X.drop(columns=['Name'])
+# Y
+df_final_Y = df_final['pIC50']
+
+# combining X and Y variable
+dataset = pd.concat([df_final_X, df_final_Y], axis=1)
+# dataframe to csv
+dataset.to_csv('dataset.csv', index=False)
+
+
+
+
+
+
+
