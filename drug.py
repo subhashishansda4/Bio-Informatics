@@ -20,6 +20,9 @@ import numpy as np
 import seaborn as sns
 sns.set(style='ticks')
 import matplotlib.pyplot as plt
+# machine learning
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
 # rdkit for lipinski descriptors
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski
@@ -320,10 +323,17 @@ df_final_Y = df_final['pIC50']
 dataset = pd.concat([df_final_X, df_final_Y], axis=1)
 # dataframe to csv
 dataset.to_csv('dataset.csv', index=False)
+#---------------------------------------------------------------------------------------------------------
 
-
-
-
+# MACHINE LEARNING MODELS
+#---------------------------------------------------------------------------------------------------------
+# input features
+X = dataset.drop('pIC50', axis=1)
+# output features
+Y = dataset.pIC50
+# data dimension
+print(X.shape)
+print(Y.shape)
 
 
 
