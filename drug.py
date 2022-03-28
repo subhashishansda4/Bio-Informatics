@@ -23,6 +23,10 @@ import matplotlib.pyplot as plt
 # machine learning
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.feature_selection import VarianceThreshold
+# lazypredict machine learning
+import lazypredict
+from lazypredict.Supervised import LazyRegressor
 # rdkit for lipinski descriptors
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski
@@ -318,6 +322,7 @@ df_final_X = pd.read_csv('descriptors_output.csv')
 df_final_X = df_final_X.drop(columns=['Name'])
 # Y
 df_final_Y = df_final['pIC50']
+df_final_Y = df_final_Y.to_frame()
 
 # combining X and Y variable
 dataset = pd.concat([df_final_X, df_final_Y], axis=1)
@@ -334,6 +339,59 @@ Y = dataset.pIC50
 # data dimension
 print(X.shape)
 print(Y.shape)
+
+# =============================================================================
+# # remove low variance features
+# selection = VarianceThreshold(threshold=(.8*(1-.8)))
+# X = selection.fit_transform(X)
+# print(X.shape)
+# =============================================================================
+
+# data split
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+print(x_test.shape)
+print(y_test.shape)
+
+Y = Y.to_frame()
+y_test = y_test.to_frame()
+y_train = y_train.to_frame()
+
+# building over 42 regression models
+# using LazyPredict
+# default parameters
+clf = LazyRegressor(verbose=0, ignore_warnings=(True), custom_metric=(None))
+train, test = clf.fit(x_train, x_test, y_train, y_test)
+# performance table of training set
+print(train)
+# performance table of test set
+print(test)
+#---------------------------------------------------------------------------------------------------------
+
+# DATA VISUALIZATION
+#---------------------------------------------------------------------------------------------------------
+# bar plots
+# R-Squared values
+# =============================================================================
+# plt.figure(figsize = (5, 10))
+# sns.set_theme(style='whitegrid')
+# ax = sns.barplot(y=train.index, x='R-Squared', data=train)
+# ax.set(xlim=(0,1))
+# plt.savefig('R-Squared.jpg')
+# 
+# # RMSE values
+# plt.figure(figsize = (5, 10))
+# sns.set_theme(style='whitegrid')
+# ax = sns.barplot(y=train.index, x='RMSE', data=train)
+# ax.set(xlim=(0,10))
+# plt.savefig('RMSE.jpg')
+# 
+# # calculation time
+# plt.figure(figsize = (5, 10))
+# sns.set_theme(style='whitegrid')
+# ax = sns.barplot(y=train.index, x='Time Taken', data=train)
+# ax.set(xlim=(0,10))
+# plt.savefig('Calculation_Time.jpg')
+# =============================================================================
 
 
 
