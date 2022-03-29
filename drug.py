@@ -371,27 +371,26 @@ print(test)
 #---------------------------------------------------------------------------------------------------------
 # bar plots
 # R-Squared values
-# =============================================================================
-# plt.figure(figsize = (5, 10))
-# sns.set_theme(style='whitegrid')
-# ax = sns.barplot(y=train.index, x='R-Squared', data=train)
-# ax.set(xlim=(0,1))
-# plt.savefig('R-Squared.jpg')
-# 
-# # RMSE values
-# plt.figure(figsize = (5, 10))
-# sns.set_theme(style='whitegrid')
-# ax = sns.barplot(y=train.index, x='RMSE', data=train)
-# ax.set(xlim=(0,10))
-# plt.savefig('RMSE.jpg')
-# 
-# # calculation time
-# plt.figure(figsize = (5, 10))
-# sns.set_theme(style='whitegrid')
-# ax = sns.barplot(y=train.index, x='Time Taken', data=train)
-# ax.set(xlim=(0,10))
-# plt.savefig('Calculation_Time.jpg')
-# =============================================================================
+plt.figure(figsize = (5, 10))
+sns.set_theme(style='whitegrid')
+ax = sns.barplot(y=train.index, x='R-Squared', data=train)
+ax.set(xlim=(0,1))
+plt.savefig('R-Squared.jpg')
+
+# RMSE values
+plt.figure(figsize = (5, 10))
+sns.set_theme(style='whitegrid')
+ax = sns.barplot(y=train.index, x='RMSE', data=train)
+ax.set(xlim=(0,10))
+plt.savefig('RMSE.jpg')
+
+# calculation time
+plt.figure(figsize = (5, 10))
+sns.set_theme(style='whitegrid')
+ax = sns.barplot(y=train.index, x='Time Taken', data=train)
+ax.set(xlim=(0,10))
+plt.savefig('Calculation_Time.jpg')
+
 
 
 
