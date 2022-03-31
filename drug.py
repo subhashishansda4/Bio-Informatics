@@ -25,7 +25,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import VarianceThreshold
 # lazypredict machine learning
-import lazypredict
 from lazypredict.Supervised import LazyRegressor
 # rdkit for lipinski descriptors
 from rdkit import Chem
@@ -36,25 +35,33 @@ from chembl_webresource_client.new_client import new_client
 # search for target protein
 target = new_client.target
 target_query = target.search('coronavirus')
-targets = pd.DataFrame().from_dict(target_query)
+targets = pd.DataFrame.from_dict(target_query)
+print('Targets Dataframe')
+print(targets)
 
 # select and retreive bioactivity data for SARS coronavirus 3C-like proteinase
 selected_target = targets.target_chembl_id[4]
+print('Selected Target:', selected_target)
 
 # filtering by selected_target and standard_type
 activity = new_client.activity
 res = activity.filter(target_chembl_id = selected_target).filter(standard_type = 'IC50')
 
 # creating dataframe
-df = pd.DataFrame().from_dict(res)
-df.head(3)
-df.standard_type.unique()
+df = pd.DataFrame.from_dict(res)
+print(df.head(3))
+print(df.standard_type.unique())
 
 # dataframe to csv
-df.to_csv('bioactivity_data.csv', index = False)
+df.to_csv('bioactivity_data_raw.csv', index = False)
 
-# dropping missing value for the standard_value column
+# dropping missing value for the standard_value and canonical_smiles column
 df = df[df.standard_value.notna()]
+df = df[df.canonical_smiles.notna()]
+print('total unique smiles notations', len(df.canonical_smiles.unique()))
+# dropping duplicate canonical_smiles
+df = df.drop_duplicates(['canonical_smiles'])
+print(df)
 
 # data pre-processing
 # labelling compound as either being active, inactive or intermediate
@@ -96,11 +103,24 @@ df_bioclass = pd.DataFrame(data_tuples, columns=['molecule_chembl_id', 'canonica
 
 # dataframe to csv
 df_bioclass.to_csv('bioactivity_preprocessed_data.csv', index = False)
+print('Preprocessed Dataframe', df_bioclass)
 #---------------------------------------------------------------------------------------------------------
 
 
 # DATA CLEANING & PROCESSING
 #---------------------------------------------------------------------------------------------------------
+df_no_smiles = df_bioclass.drop(columns='canonical_smiles')
+
+smiles = []
+for i in df_bioclass.canonical_smiles.tolist():
+  cpd = str(i).split('.')
+  cpd_longest = max(cpd, key = len)
+  smiles.append(cpd_longest)
+  
+smiles = pd.Series(smiles, name = 'canonical_smiles')
+df_clean_smiles = pd.concat([df_no_smiles,smiles], axis=1)
+print('Clean Dataframe', df_clean_smiles)
+
 # source - https://codeocean.com/explore/capsules?query=tag:data-curation
 # calculating lipinski descriptors
 def lipinski(smiles, verbose = False):
@@ -135,8 +155,9 @@ def lipinski(smiles, verbose = False):
     return descriptors
 
 # dataframe
-df_lipinski = lipinski(df.canonical_smiles)
-df_lipinski = pd.concat([df_bioclass, df_lipinski], axis=1)
+df_lipinski = lipinski(df_clean_smiles.canonical_smiles)
+print('Lipinski Descriptors', df_lipinski)
+df_lipinski = pd.concat([df_clean_smiles, df_lipinski], axis=1)
 
 # dataframe to csv
 df_lipinski.to_csv('lipinski_descriptors.csv', index=False)
@@ -144,12 +165,11 @@ df_lipinski.to_csv('lipinski_descriptors.csv', index=False)
 # NOTE
 # values greater than 100,000,000 will be fixed at that value
 # otherwise the negative logarithmic value will become negative
-df_lipinski.standard_value.describe()
--np.log10((10**-9)*100000000)
--np.log10((10**-9)*10000000000)
+print(df_lipinski.standard_value.describe())
+print(-np.log10((10**-9)*100000000))
+print(-np.log10((10**-9)*10000000000))
 
 # changing data type of 'standard_value'
-print(df_lipinski.dtypes)
 df_lipinski['standard_value'] = df_lipinski['standard_value'].astype(float)
 print(df_lipinski.dtypes)
 
@@ -163,7 +183,7 @@ def norm_value(input):
         norm.append(i)
     
     input['standard_value_norm'] = norm
-    #x = input.drop('standard_value', 1)
+    x = input.drop('standard_value', 1)
     x = input
     
     return x
@@ -187,8 +207,12 @@ def pIC50(input):
 df_final = norm_value(df_lipinski)
 # applying conversion of IC50 to pIC50
 df_final = pIC50(df_final)
+# statistics of standard_value and pIC50 values
+print(df_final.standard_value.describe())
+print(df_final.pIC50.describe())
 # removing 'intermediate' bioactivity class
 df_final = df_final[df_final.bioactivity_class != 'intermediate']
+print('Final Dataframe', df_final)
 
 # dataframe to csv
 df_final.to_csv('final_data.csv', index=False)
@@ -322,12 +346,12 @@ df_final_X = pd.read_csv('descriptors_output.csv')
 df_final_X = df_final_X.drop(columns=['Name'])
 # Y
 df_final_Y = df_final['pIC50']
-df_final_Y = df_final_Y.to_frame()
 
 # combining X and Y variable
 dataset = pd.concat([df_final_X, df_final_Y], axis=1)
 # dataframe to csv
 dataset.to_csv('dataset.csv', index=False)
+print('PubChem Fingerprints', dataset)
 #---------------------------------------------------------------------------------------------------------
 
 # MACHINE LEARNING MODELS
@@ -337,18 +361,19 @@ X = dataset.drop('pIC50', axis=1)
 # output features
 Y = dataset.pIC50
 # data dimension
-print(X.shape)
-print(Y.shape)
+print('X=', X.shape)
+print('Y=', Y.shape)
 
-# =============================================================================
-# # remove low variance features
-# selection = VarianceThreshold(threshold=(.8*(1-.8)))
-# X = selection.fit_transform(X)
-# print(X.shape)
-# =============================================================================
+# remove low variance features
+selection = VarianceThreshold(threshold=(.8*(1-.8)))
+X = selection.fit_transform(X)
+print('X=', X.shape)
 
 # data split
 x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+print('shapes:')
+print(x_train.shape)
+print(y_train.shape)
 print(x_test.shape)
 print(y_test.shape)
 
@@ -356,6 +381,17 @@ Y = Y.to_frame()
 y_test = y_test.to_frame()
 y_train = y_train.to_frame()
 
+# RANDOM FOREST
+#---------------------------------------------------------------------------------------------------------
+model = RandomForestRegressor(n_estimators=100)
+model.fit(x_train, y_train)
+r2 = model.score(x_test, y_test)
+print(r2)
+y_pred = model.predict(x_test)
+#---------------------------------------------------------------------------------------------------------
+
+# LAZYPREDICT
+#---------------------------------------------------------------------------------------------------------
 # building over 42 regression models
 # using LazyPredict
 # default parameters
@@ -369,6 +405,19 @@ print(test)
 
 # DATA VISUALIZATION
 #---------------------------------------------------------------------------------------------------------
+# scatter plot of experimental vs predicted pIC50 values
+sns.set(color_codes=True)
+sns.set_style('white')
+
+ax = sns.regplot(y_test, y_pred, scatter_kws = {'alpha': 0.4})
+ax.set_xlabel('Experimental pIC50', fontsize='large', fontweight='bold')
+ax.set_ylabel('Predicted pIC50', fontsize='large', fontweight='bold')
+
+ax.set_xlim(0, 12)
+ax.set_ylim(0, 12)
+ax.figure.set_size_inches(5, 5)
+plt.savefig('predicted_vs_experimental_pIC50.jpg')
+
 # bar plots
 # R-Squared values
 plt.figure(figsize = (5, 10))
