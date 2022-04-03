@@ -13,19 +13,29 @@ linear regression model for predicting molecular solubility
 '''
 
 # DATA COLLECTION
-#---------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # importing libraries
 import pandas as pd
 import numpy as np
 import seaborn as sns
 sns.set(style='ticks')
 import matplotlib.pyplot as plt
+# PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 # machine learning
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_selection import VarianceThreshold
-# lazypredict machine learning
-from lazypredict.Supervised import LazyRegressor
+from sklearn import metrics
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import BayesianRidge
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
+from xgboost import XGBRegressor
+
 # rdkit for lipinski descriptors
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski
@@ -34,14 +44,16 @@ from chembl_webresource_client.new_client import new_client
 
 # search for target protein
 target = new_client.target
-target_query = target.search('coronavirus')
+target_query = target.search('acetylcholinesterase')
 targets = pd.DataFrame.from_dict(target_query)
 print('Targets Dataframe')
 print(targets)
+print('')
 
 # select and retreive bioactivity data for SARS coronavirus 3C-like proteinase
-selected_target = targets.target_chembl_id[4]
+selected_target = targets.target_chembl_id[0]
 print('Selected Target:', selected_target)
+print('')
 
 # filtering by selected_target and standard_type
 activity = new_client.activity
@@ -50,7 +62,9 @@ res = activity.filter(target_chembl_id = selected_target).filter(standard_type =
 # creating dataframe
 df = pd.DataFrame.from_dict(res)
 print(df.head(3))
+print('')
 print(df.standard_type.unique())
+print('')
 
 # dataframe to csv
 df.to_csv('bioactivity_data_raw.csv', index = False)
@@ -62,6 +76,7 @@ print('total unique smiles notations', len(df.canonical_smiles.unique()))
 # dropping duplicate canonical_smiles
 df = df.drop_duplicates(['canonical_smiles'])
 print(df)
+print('')
 
 # data pre-processing
 # labelling compound as either being active, inactive or intermediate
@@ -103,12 +118,14 @@ df_bioclass = pd.DataFrame(data_tuples, columns=['molecule_chembl_id', 'canonica
 
 # dataframe to csv
 df_bioclass.to_csv('bioactivity_preprocessed_data.csv', index = False)
-print('Preprocessed Dataframe', df_bioclass)
-#---------------------------------------------------------------------------------------------------------
+print('Preprocessed Dataframe')
+print(df_bioclass)
+print('')
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 # DATA CLEANING & PROCESSING
-#---------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 df_no_smiles = df_bioclass.drop(columns='canonical_smiles')
 
 smiles = []
@@ -119,7 +136,9 @@ for i in df_bioclass.canonical_smiles.tolist():
   
 smiles = pd.Series(smiles, name = 'canonical_smiles')
 df_clean_smiles = pd.concat([df_no_smiles,smiles], axis=1)
-print('Clean Dataframe', df_clean_smiles)
+print('Clean Dataframe')
+print(df_clean_smiles)
+print('')
 
 # source - https://codeocean.com/explore/capsules?query=tag:data-curation
 # calculating lipinski descriptors
@@ -156,7 +175,9 @@ def lipinski(smiles, verbose = False):
 
 # dataframe
 df_lipinski = lipinski(df_clean_smiles.canonical_smiles)
-print('Lipinski Descriptors', df_lipinski)
+print('Lipinski Descriptors')
+print(df_lipinski)
+print('')
 df_lipinski = pd.concat([df_clean_smiles, df_lipinski], axis=1)
 
 # dataframe to csv
@@ -166,12 +187,14 @@ df_lipinski.to_csv('lipinski_descriptors.csv', index=False)
 # values greater than 100,000,000 will be fixed at that value
 # otherwise the negative logarithmic value will become negative
 print(df_lipinski.standard_value.describe())
+print('')
 print(-np.log10((10**-9)*100000000))
 print(-np.log10((10**-9)*10000000000))
 
 # changing data type of 'standard_value'
 df_lipinski['standard_value'] = df_lipinski['standard_value'].astype(float)
 print(df_lipinski.dtypes)
+print('')
 
 # capping the standard_value
 def norm_value(input):
@@ -209,18 +232,21 @@ df_final = norm_value(df_lipinski)
 df_final = pIC50(df_final)
 # statistics of standard_value and pIC50 values
 print(df_final.standard_value.describe())
+print('')
 print(df_final.pIC50.describe())
+print('')
 # removing 'intermediate' bioactivity class
 df_final = df_final[df_final.bioactivity_class != 'intermediate']
-print('Final Dataframe', df_final)
+print('Final Dataframe')
+print(df_final)
 
 # dataframe to csv
 df_final.to_csv('final_data.csv', index=False)
-#---------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 # EDA (CHEMICAL SPACE ANALYSIS)
-#---------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 '''
 Jose Medina Franco (author)
 each chemical compound could be thought of as stars, i.e. active molecules would be compared to as constellations
@@ -331,11 +357,13 @@ plt.xlabel('Bioactivity_class', fontsize = 14, fontweight = 'bold')
 plt.ylabel('NumHAcceptors', fontsize = 14, fontweight = 'bold')
 plt.savefig('NumHAcceptors.jpg')
 mannwhitney('NumHAcceptors')
-#---------------------------------------------------------------------------------------------------------
+
+print('')
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 # DATA PREPARATION
-#---------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 selection = ['canonical_smiles', 'molecule_chembl_id']
 df_final_selection = df_final[selection]
 df_final_selection.to_csv('molecule.smi', sep='\t', index=False, header=False)
@@ -349,97 +377,333 @@ df_final_Y = df_final['pIC50']
 
 # combining X and Y variable
 dataset = pd.concat([df_final_X, df_final_Y], axis=1)
+
+# missing values
+missing_values = dataset.isnull().sum()
+missing_values[0:10]
+
+total_cells = np.product(dataset.shape)
+total_missing = missing_values.sum()
+percent_missing = (total_missing/total_cells)*100
+print(percent_missing)
+print('')
+
+dataset = dataset.dropna()
+
 # dataframe to csv
 dataset.to_csv('dataset.csv', index=False)
-print('PubChem Fingerprints', dataset)
-#---------------------------------------------------------------------------------------------------------
+print('PubChem Fingerprints')
+print(dataset)
+print('')
 
-# MACHINE LEARNING MODELS
-#---------------------------------------------------------------------------------------------------------
+# Principal Component Analysis
+# source - https://www.kaggle.com/code/ankitjha/comparing-regression-models/notebook
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# normalization
+#data = StandardScaler().fit_transform(dataset)
+data = dataset
+
+pca = PCA().fit(data)
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.xlim(0,60,1)
+plt.xlabel('Number of Components')
+plt.ylabel('Cumulative explained variance')
+plt.savefig('PCA.jpg')
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# SPLITTING DATA
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # input features
-X = dataset.drop('pIC50', axis=1)
+data_X = data.drop('pIC50', axis=1)
+# using number of components to be 80
+# since it can explain almost 40% of the variance
+X = PCA(n_components=40).fit_transform(data_X)
 # output features
-Y = dataset.pIC50
+Y = data.pIC50
 # data dimension
 print('X=', X.shape)
 print('Y=', Y.shape)
+print('')
 
 # remove low variance features
 selection = VarianceThreshold(threshold=(.8*(1-.8)))
 X = selection.fit_transform(X)
 print('X=', X.shape)
+print('')
 
 # data split
-x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 print('shapes:')
 print(x_train.shape)
 print(y_train.shape)
 print(x_test.shape)
 print(y_test.shape)
+print('')
 
 Y = Y.to_frame()
 y_test = y_test.to_frame()
 y_train = y_train.to_frame()
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# RANDOM FOREST
-#---------------------------------------------------------------------------------------------------------
-model = RandomForestRegressor(n_estimators=100)
-model.fit(x_train, y_train)
-r2 = model.score(x_test, y_test)
-print(r2)
-y_pred = model.predict(x_test)
-#---------------------------------------------------------------------------------------------------------
+# MACHINE LEARNING MODELS
+# source - https://dibyendudeb.com/comparing-machine-learning-regression-models-using-python/
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# MULTIPLE LINEAR REGRESSION
+lin_reg = LinearRegression()
+lin_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred1 = lin_reg.predict(x_test)
+# mean absolute error
+mae1 = metrics.mean_absolute_error(y_test, y_pred1)
+# mean square error
+mse1 = metrics.mean_squared_error(y_test, y_pred1)
+# r2 square
+r21 = metrics.r2_score(y_test, y_pred1)
+# scores
+print('Multiple Linear Regression')
+print(mae1)
+print(mse1)
+print(r21)
+print('')
 
-# LAZYPREDICT
-#---------------------------------------------------------------------------------------------------------
-# building over 42 regression models
-# using LazyPredict
-# default parameters
-clf = LazyRegressor(verbose=0, ignore_warnings=(True), custom_metric=(None))
-train, test = clf.fit(x_train, x_test, y_train, y_test)
-# performance table of training set
-print(train)
-# performance table of test set
-print(test)
-#---------------------------------------------------------------------------------------------------------
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred1)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('Multiple Linear Regression.jpg')
+
+
+# DECISION TREE REGRESSION
+dt_reg = DecisionTreeRegressor(random_state=0)
+dt_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred2 = dt_reg.predict(x_test)
+# mean absolute error
+mae2 = metrics.mean_absolute_error(y_test, y_pred2)
+# mean square error
+mse2 = metrics.mean_squared_error(y_test, y_pred2)
+# r2 square
+r22 = metrics.r2_score(y_test, y_pred2)
+# scores
+print('Decision Tree Regression')
+print(mae2)
+print(mse2)
+print(r22)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred2)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('Decision Tree Regression.jpg')
+
+
+# RANDOM FOREST REGRESSION
+rf_reg = RandomForestRegressor(n_estimators=1000, random_state=0)
+rf_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred3 = rf_reg.predict(x_test)
+# mean absolute error
+mae3 = metrics.mean_absolute_error(y_test, y_pred3)
+# mean square error
+mse3 = metrics.mean_squared_error(y_test, y_pred3)
+# r2 square
+r23 = metrics.r2_score(y_test, y_pred3)
+# scores
+print('Random Forest Regression')
+print(mae3)
+print(mse3)
+print(r23)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred3)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('Random Forest Regression.jpg')
+
+
+# RIDGE REGRESSION
+rdg_reg = Ridge()
+rdg_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred4 = rdg_reg.predict(x_test)
+# mean absolute error
+mae4 = metrics.mean_absolute_error(y_test, y_pred4)
+# mean square error
+mse4 = metrics.mean_squared_error(y_test, y_pred4)
+# r2 square
+r24 = metrics.r2_score(y_test, y_pred4)
+# scores
+print('Ridge Regression')
+print(mae4)
+print(mse4)
+print(r24)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred4)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('Ridge Regression.jpg')
+
+
+# BAYESIAN REGRESSION
+by_reg = BayesianRidge()
+by_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred5 = by_reg.predict(x_test)
+# mean absolute error
+mae5 = metrics.mean_absolute_error(y_test, y_pred5)
+# mean square error
+mse5 = metrics.mean_squared_error(y_test, y_pred5)
+# r2 square
+r25 = metrics.r2_score(y_test, y_pred5)
+# scores
+print('Bayesian Regression')
+print(mae5)
+print(mse5)
+print(r25)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred5)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('Bayesian Regression.jpg')
+
+
+# K-NEAREST NEIGHBOUR
+n = 5
+knn_reg = KNeighborsRegressor(n, weights='uniform')
+knn_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred6 = knn_reg.predict(x_test)
+# mean absolute error
+mae6 = metrics.mean_absolute_error(y_test, y_pred6)
+# mean square error
+mse6 = metrics.mean_squared_error(y_test, y_pred6)
+# r2 square
+r26 = metrics.r2_score(y_test, y_pred6)
+# scores
+print('K-Nearest Neighbour')
+print(mae6)
+print(mse6)
+print(r26)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred6)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('K-Nearest Neighbour.jpg')
+
+
+# SUPPORT VECTOR REGRESSION
+sv_reg = SVR(kernel='rbf')
+sv_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred7 = sv_reg.predict(x_test)
+# mean absolute error
+mae7 = metrics.mean_absolute_error(y_test, y_pred7)
+# mean square error
+mse7 = metrics.mean_squared_error(y_test, y_pred7)
+# r2 square
+r27 = metrics.r2_score(y_test, y_pred7)
+# scores
+print('Support Vector Regression')
+print(mae7)
+print(mse7)
+print(r27)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred7)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('Support Vector Regression.jpg')
+
+
+# XGBOOST REGRESSION
+xgb_reg = XGBRegressor(n_estimators=1000, learning_rate=0.05, random_state=0)
+xgb_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred8 = xgb_reg.predict(x_test)
+# mean absolute error
+mae8 = metrics.mean_absolute_error(y_test, y_pred7)
+# mean square error
+mse8 = metrics.mean_squared_error(y_test, y_pred7)
+# r2 square
+r28 = metrics.r2_score(y_test, y_pred7)
+# scores
+print('XGBoost Regressor')
+print(mae8)
+print(mse8)
+print(r28)
+print('')
+
+# scatter plot of experimental vs predicted pIC50 values
+plt.scatter(y_test, y_pred8)
+plt.xlabel('Experimental pIC50')
+plt.ylabel('Predicted pIC50')
+lims = [0,12]
+plt.xlim(lims)
+plt.ylim(lims)
+_ = plt.plot(lims, lims)
+plt.savefig('XGBoost Regression.jpg')
+
 
 # DATA VISUALIZATION
-#---------------------------------------------------------------------------------------------------------
-# scatter plot of experimental vs predicted pIC50 values
-sns.set(color_codes=True)
-sns.set_style('white')
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+models = ['Multiple Linear Regression', 'Decision Tree Regression', 'Random Forest Regression', 'Ridge Regression', 'Bayesian Regression', 'K-Nearest Neighbour', 'Support Vector Regression', 'XGBoost Regression']
+mae_values = [mae1, mae2, mae3, mae4, mae5, mae6, mae7, mae8]
+mse_values = [mse1, mse2, mse3, mse4, mse5, mse6, mse7, mse8]
+r2_values = [r21, r22, r23, r24, r25, r26, r27, r28]
 
-ax = sns.regplot(y_test, y_pred, scatter_kws = {'alpha': 0.4})
-ax.set_xlabel('Experimental pIC50', fontsize='large', fontweight='bold')
-ax.set_ylabel('Predicted pIC50', fontsize='large', fontweight='bold')
+col = {'MAE Values':mae_values, 'MSE Values':mse_values, 'R2 Values':r2_values}
+bar = pd.DataFrame(data=col, index=models)
+bar.plot(kind='bar')
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-ax.set_xlim(0, 12)
-ax.set_ylim(0, 12)
-ax.figure.set_size_inches(5, 5)
-plt.savefig('predicted_vs_experimental_pIC50.jpg')
+# CONCLUSION
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+rf_reg = RandomForestRegressor(n_estimators=1000, random_state=0)
+rf_reg.fit(x_train, y_train)
+# predicting using test set
+y_pred = rf_reg.predict(x_test)
 
-# bar plots
-# R-Squared values
-plt.figure(figsize = (5, 10))
-sns.set_theme(style='whitegrid')
-ax = sns.barplot(y=train.index, x='R-Squared', data=train)
-ax.set(xlim=(0,1))
-plt.savefig('R-Squared.jpg')
+output = pd.DataFrame({'pIC50':y_test.pIC50, 'Predictions':y_pred})
+print(output)
+print(output.describe())
 
-# RMSE values
-plt.figure(figsize = (5, 10))
-sns.set_theme(style='whitegrid')
-ax = sns.barplot(y=train.index, x='RMSE', data=train)
-ax.set(xlim=(0,10))
-plt.savefig('RMSE.jpg')
-
-# calculation time
-plt.figure(figsize = (5, 10))
-sns.set_theme(style='whitegrid')
-ax = sns.barplot(y=train.index, x='Time Taken', data=train)
-ax.set(xlim=(0,10))
-plt.savefig('Calculation_Time.jpg')
-
-
-
-
+# dataframe to csv
+output.to_csv('Predictions.csv', index=False)
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
