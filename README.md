@@ -55,7 +55,7 @@ He developed an approach termed as "constellation plot" whereby one can perform 
 
 1. Frequency plot of 2 bioactivity classes comparing the inactive and active molecules
     ![freq_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_bioactivity_class.jpg)
-2. Scatter plot of molecular weight (MW) v/s molecular solubilityt (LogP)
+2. Scatter plot of molecular weight (MW) v/s molecular solubilityt (LogP) \
     It can be seen that the 2 bioactivity classes are spanning similar chemical spaces as evident by the scatter plot of MW v/s LogP \
     ![scatter_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW_vs_logP.jpg)
 
