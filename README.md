@@ -32,18 +32,17 @@ Biologically, these compounds will come into contact with the protein/organism a
 
 #### Lipinski Descriptors
 **rdkit** allows us to compute molecular decriptors for the compounds in the dataset that we have compiled \
-\
 **Christopher Lipinski**, a scientist at Pfizer came up with a set of rule-of-five for evaluating the 'relative druglikeness of the compound' of compounds based on the key pharmaceutical kinetic properties:
 * Absorption
 * Distribution
 * Metabolism
-* Excretion
+* Excretion \
 \
 Lipinski analyzed all orally active FDA-approved drugs in the formulation whether it can be absorbed into the body, distributed to the proper tissue/organs and become metabolised. Following 4 descriptors that was used for his analysis has corresponding values in multiples of 5:
 * Molecular Weight < 500 Dalton
 * Octanol-Water partition coefficient (LogP) < 5
 * Hydrogen bond donors < 5
-* Hydrogen bond acceptors < 10
+* Hydrogen bond acceptors < 10 \
 \
 **Calculating Descriptors** \
 Converting standard_value from IC50 to pIC50 to allow IC50 to be more uniformly distributed. We will convert the IC50 values to the negative logarithmic scale which is essentially -log10. Applying value normalization because values greater than negative logarithmic of 100,000,000 will become negative
@@ -51,13 +50,14 @@ Converting standard_value from IC50 to pIC50 to allow IC50 to be more uniformly 
 #### Chemical Space Analysis
 **Jose Medina Franco** (author) \
 "Each chemical compound can be thought of as stars, i.e. active molecules would be compared to as constellations" \
+\
 He developed an approach termed as "constellation plot" whereby one can perform chemcial space analysis and create constellation plot where active molecule have correspondingly have larger size compared to less active molecule \
 
 1. Frequency plot of 2 bioactivity classes comparing the inactive and active molecules
     ![freq_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_bioactivity_class.jpg)
 2. Scatter plot of molecular weight (MW) v/s molecular solubilityt (LogP)
-    ![scatter_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW_vs_logP.jpg) \
     It can be seen that the 2 bioactivity classes are spanning similar chemical spaces as evident by the scatter plot of MW v/s LogP \
+    ![scatter_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW_vs_logP.jpg)
 
 #### Mann Whitney Analysis
 
