@@ -44,7 +44,7 @@ Lipinski analyzed all orally active FDA-approved drugs in the formulation whethe
 * Hydrogen bond donors < 5
 * Hydrogen bond acceptors < 10
 
-**Calculating Descriptors** \
+#### Calculating Descriptors
 Converting standard_value from IC50 to pIC50 to allow IC50 to be more uniformly distributed. We will convert the IC50 values to the negative logarithmic scale which is essentially -log10. Applying value normalization because values greater than negative logarithmic of 100,000,000 will become negative
 
 ### Chemical Space Analysis
@@ -62,16 +62,16 @@ He developed an approach termed as "constellation plot" whereby one can perform 
 ### Mann Whitney Analysis
 U-Test used to test whether two samples are likely to derive from the same population \
 Box plots for pIC50, MW, LogP, NumHDonors, NumHAcceptors:
-1. pIC50
+1. pIC50 \
     ![pIC50](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_ic50.jpg)
-2. MW
+2. MW \
     ![MW](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW.jpg)
-3. LogP
+3. LogP \
     ![LogP](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_LogP.jpg)
-4. NumHDonors
+4. NumHDonors \
     ![NumHDonors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_NumHDonors.jpg)
-5. NumHAcceptors
-    ![NumHAcceptors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/NumHAcceptors.jpg) \
+5. NumHAcceptors \
+    ![NumHAcceptors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/NumHAcceptors.jpg)
 \
 pIC50 values of actives and inactives displayed statistically significant differenece which is to be expected since threshold values are (pIC50 > 6 for active AND pIC50 < 5 for inactive) \
 \
