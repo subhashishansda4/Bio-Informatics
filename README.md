@@ -36,14 +36,14 @@ Biologically, these compounds will come into contact with the protein/organism a
 * Absorption
 * Distribution
 * Metabolism
-* Excretion \
-\
+* Excretion
+
 Lipinski analyzed all orally active FDA-approved drugs in the formulation whether it can be absorbed into the body, distributed to the proper tissue/organs and become metabolised. Following 4 descriptors that was used for his analysis has corresponding values in multiples of 5:
 * Molecular Weight < 500 Dalton
 * Octanol-Water partition coefficient (LogP) < 5
 * Hydrogen bond donors < 5
-* Hydrogen bond acceptors < 10 \
-\
+* Hydrogen bond acceptors < 10
+
 **Calculating Descriptors** \
 Converting standard_value from IC50 to pIC50 to allow IC50 to be more uniformly distributed. We will convert the IC50 values to the negative logarithmic scale which is essentially -log10. Applying value normalization because values greater than negative logarithmic of 100,000,000 will become negative
 
@@ -56,7 +56,7 @@ He developed an approach termed as "constellation plot" whereby one can perform 
 1. Frequency plot of 2 bioactivity classes comparing the inactive and active molecules
     ![freq_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_bioactivity_class.jpg)
 2. Scatter plot of molecular weight (MW) v/s molecular solubilityt (LogP) \
-    It can be seen that the 2 bioactivity classes are spanning similar chemical spaces as evident by the scatter plot of MW v/s LogP \
+    It can be seen that the 2 bioactivity classes are spanning similar chemical spaces as evident by this \
     ![scatter_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW_vs_logP.jpg)
 
 #### Mann Whitney Analysis
