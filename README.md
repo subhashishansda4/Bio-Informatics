@@ -60,15 +60,19 @@ It can be seen that the 2 bioactivity classes are spanning similar chemical spac
 U-Test used to test whether two samples are likely to derive from the same population \
 Box plots for pIC50, MW, LogP, NumHDonors, NumHAcceptors \
 pIC50 \
-    ![pIC50](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_ic50.jpg) \
+![pIC50](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_ic50.jpg) \
+\
 MW \
-    ![MW](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW.jpg) \
+![MW](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW.jpg) \
+\
 LogP \
-    ![LogP](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_LogP.jpg) \
+![LogP](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_LogP.jpg) \
+\
 NumHDonors \
-    ![NumHDonors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_NumHDonors.jpg) \
+![NumHDonors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_NumHDonors.jpg) \
+\
 NumHAcceptors \
-    ![NumHAcceptors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/NumHAcceptors.jpg) \
+![NumHAcceptors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/NumHAcceptors.jpg) \
 \
 pIC50 values of actives and inactives displayed statistically significant differenece which is to be expected since threshold values are (pIC50 > 6 for active AND pIC50 < 5 for inactive) \
 \
@@ -81,23 +85,23 @@ Out of the 4 Lipinski descriptors only NumHDonors exhibited no difference betwee
 | provides set of simple molecular descriptors of molecule | describing local features of molecules |
 | 4 descriptors responsible for drug-like properties | each molecule will be described by the unique building blocks of molecule |
 | describes global features of molecules such as molecular size, solubility, number of H bond donors and acceptors | molecules provides most potency towards target protein that it wants to interact while also being safe and non-toxic |
-\
+
 Using **PaDEL Descriptors** to calculate molecular descriptors and fingerprints\
 **padel.sh**:
-- jar : for using PaDEL-Descriptor.jar
-- removesalt : removing sodium & chloride which are in the chemical structure / small organic assets from chemical structure
-- fingerprints : tells the program that we gonna compute the molecular fingerprints {fingerprint_type - PubChem}
+- jar - for using PaDEL-Descriptor.jar
+- removesalt - removing sodium & chloride which are in the chemical structure / small organic assets from chemical structure
+- fingerprints - tells the program that we gonna compute the molecular fingerprints {fingerprint_type : PubChem}
 
 ## Machine Learning
 Which funtional group or fingerprints are essential for designing a good drug so that the target variable that we are using for our prediction i.e. pIC50 can be minimum while also being active \
-Removing **Low Variance Features** because lower variance features are constant and thus, it cannot be used for finding any interesting patterns and can be removed from the dataset \
+Removing **Low Variance Features** because lower variance features are constant and thus, it cannot be used for finding any interesting patterns and can be removed from the dataset
 
 ### Principal Component Analysis
 Simplifying the complexity of our high-dimensional data while retaining trends and patterns using PCA \
 Used only 40 features for machine learning models since it describes 80% of our data \
 ![PCA](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/PCA.jpg)
 
-### Model Building
+## Model Building
 Multiple Linear Regression \
 ![MLR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Multiple%20Linear%20Regression.jpg) \
 \
