@@ -98,7 +98,7 @@ Removing **Low Variance Features** because lower variance features are constant 
 
 ### Principal Component Analysis
 Simplifying the complexity of our high-dimensional data while retaining trends and patterns using PCA \
-Used only 40 features for machine learning models since it describes 80% of our data \
+Used only 40 features for machine learning models since it describes 80% of variance \
 ![PCA](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/PCA.jpg)
 
 ## Model Building
@@ -126,13 +126,10 @@ Support Vector Regression \
 XGBoost Regression \
 ![XGB](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/XGBoost%20Regression.jpg) \
 
-## Bibliography
-1. 
-2. 
-3.
-
-
-
+## Conclusion
+Acheived an **81%** accuracy with the **Random Forest** model for a dataset comprising of 643 rows \
+\
+![error](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/error_values.jpg)
 
 
 
