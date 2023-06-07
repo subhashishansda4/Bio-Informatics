@@ -102,6 +102,9 @@ Used only 40 features for machine learning models since it describes 80% of vari
 ![PCA](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/PCA.jpg)
 
 ## Model Building
+### Error Values
+![error](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/error_values.jpg)
+
 Multiple Linear Regression \
 ![MLR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Multiple%20Linear%20Regression.jpg) \
 \
@@ -124,11 +127,7 @@ Support Vector Regression \
 ![SVR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Support%20Vector%20Regression.jpg) \
 \
 XGBoost Regression \
-![XGB](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/XGBoost%20Regression.jpg) \
-
-## Conclusion
-\
-![error](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/error_values.jpg)
+![XGB](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/XGBoost%20Regression.jpg)
 
 
 
