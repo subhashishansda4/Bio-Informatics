@@ -50,29 +50,29 @@ Converting standard_value from IC50 to pIC50 to allow IC50 to be more uniformly 
 He developed an approach termed as "constellation plot" whereby one can perform chemcial space analysis and create constellation plot where active molecule have correspondingly have larger size compared to less active molecule \
 \
 Frequency plot of 2 bioactivity classes comparing the inactive and active molecules
-![freq_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_bioactivity_class.jpg) \
+![freq_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/plot_bioactivity_class.jpg) \
 \
 Scatter plot of molecular weight (MW) v/s molecular solubilityt (LogP) \
 It can be seen that the 2 bioactivity classes are spanning similar chemical spaces as evident by this \
-![scatter_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW_vs_logP.jpg)
+![scatter_plot](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/plot_MW_vs_logP.jpg)
 
 ### Mann Whitney Analysis
 U-Test used to test whether two samples are likely to derive from the same population \
 Box plots for pIC50, MW, LogP, NumHDonors, NumHAcceptors \
 pIC50 \
-![pIC50](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_ic50.jpg) \
+![pIC50](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/plot_ic50.jpg) \
 \
 MW \
-![MW](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_MW.jpg) \
+![MW](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/plot_MW.jpg) \
 \
 LogP \
-![LogP](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_LogP.jpg) \
+![LogP](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/plot_LogP.jpg) \
 \
 NumHDonors \
-![NumHDonors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/plot_NumHDonors.jpg) \
+![NumHDonors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/plot_NumHDonors.jpg) \
 \
 NumHAcceptors \
-![NumHAcceptors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/NumHAcceptors.jpg) \
+![NumHAcceptors](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/NumHAcceptors.jpg) \
 \
 pIC50 values of actives and inactives displayed statistically significant differenece which is to be expected since threshold values are (pIC50 > 6 for active AND pIC50 < 5 for inactive) \
 \
@@ -99,36 +99,36 @@ Removing **Low Variance Features** because lower variance features are constant 
 ### Principal Component Analysis
 Simplifying the complexity of our high-dimensional data while retaining trends and patterns using PCA \
 Used only 40 features for machine learning models since it describes 80% of variance \
-![PCA](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/PCA.jpg)
+![PCA](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/PCA.jpg)
 
 ## Model Building
 Multiple Linear Regression \
-![MLR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Multiple%20Linear%20Regression.jpg) \
+![MLR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Multiple%20Linear%20Regression.jpg) \
 \
 Decision Tree Regression \
-![DTR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Decision%20Tree%20Regression.jpg) \
+![DTR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Decision%20Tree%20Regression.jpg) \
 \
 Random Forest Regression \
-![RFR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Random%20Forest%20Regression.jpg) \
+![RFR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Random%20Forest%20Regression.jpg) \
 \
 Ridge Regression \
-![RR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Ridge%20Regression.jpg) \
+![RR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Ridge%20Regression.jpg) \
 \
 Bayesian Regression \
-![BR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Bayesian%20Regression.jpg) \
+![BR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Bayesian%20Regression.jpg) \
 \
 K-Nearest Neighbour \
-![KNN](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/K-Nearest%20Neighbour.jpg) \
+![KNN](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/K-Nearest%20Neighbour.jpg) \
 \
 Support Vector Regression \
-![SVR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/Support%20Vector%20Regression.jpg) \
+![SVR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Support%20Vector%20Regression.jpg) \
 \
 XGBoost Regression \
-![XGB](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/XGBoost%20Regression.jpg) \
+![XGB](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/XGBoost%20Regression.jpg) \
 
 ## Conclusion
 \
-![error](https://github.com/subhashishansda4/Bio-Informatics/blob/main/assets/plots/error_values.jpg)
+![error](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/error_values.jpg)
 
 
 
