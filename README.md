@@ -105,6 +105,7 @@ Used only 40 features for machine learning models since it describes 80% of vari
 ### Error Values
 ![error](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/error_values.jpg)
 
+### Scatter Plots
 Multiple Linear Regression \
 ![MLR](https://github.com/subhashishansda4/Bio-Informatics/blob/main/plots/Multiple%20Linear%20Regression.jpg) \
 \
